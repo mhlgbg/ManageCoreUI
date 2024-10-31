@@ -25,7 +25,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  
+
   const { auth, setAuth, loading } = useAuth();  // Thêm loading từ useAuth
   useEffect(() => {
     if (!loading && auth) {  // Kiểm tra nếu `auth` đã tồn tại và không còn đang tải
@@ -93,8 +93,14 @@ const Login = () => {
           <CCol md={8}>
             <CCardGroup>
               <CCard className="p-4">
-                <CCardBody>
-                  <CForm>
+                <CCardBody >
+                  <CForm onSubmit={handleLogin} // Gọi hàm handleLogin khi form được submit
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault(); // Ngăn chặn hành vi submit mặc định của form
+                        handleLogin(e); // Gọi hàm handleLogin khi nhấn Enter
+                      }
+                    }}>
                     <h1>Login</h1>
                     <p className="text-body-secondary">Sign In to your account</p>
                     <CInputGroup className="mb-3">

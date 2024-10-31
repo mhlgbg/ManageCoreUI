@@ -83,10 +83,10 @@ const ArticleListPage = () => {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     const formData = new FormData();
-    formData.append('avatar', file);
+    formData.append('thumbnailImage', file);
 
     try {
-      const response = await axios.post('/upload', formData, {
+      const response = await axios.post('/upload?field=thumbnailImage', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

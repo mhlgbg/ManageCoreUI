@@ -15,6 +15,8 @@ const ProfilePage = React.lazy(() => import('./admin/user/ProfilePage'))
 const ChangePassword = React.lazy(() => import('./admin/user/ChangePassword'))
 
 const CustomerListPage = React.lazy(() => import('./admin/Customer/CustomerListPage'))
+const CustomerStatistics = React.lazy(() => import('./admin/Customer/CustomerStatistics'))
+
 const DepartmentListPage = React.lazy(() => import('./admin/Department/DepartmentListPage'))
 
 const ArticleListPage = React.lazy(() => import('./admin/Article/ArticleListPage'))
@@ -23,6 +25,7 @@ const ArticleContentListPage  = React.lazy(() => import('./admin/Article/Article
 
 const ConfigListPage = React.lazy(() => import('./admin/Config/ConfigListPage'))
 
+const CompanyManagement = React.lazy(() => import('./admin/Company/CompanyManagement'))
 //Staff
 const DepartmentCustomerListPage = React.lazy(() => import('./admin/Department/DepartmentCustomerListPage'))
 
@@ -70,8 +73,19 @@ const Alerts = React.lazy(() => import('./views/notifications/alerts/Alerts'))
 const Badges = React.lazy(() => import('./views/notifications/badges/Badges'))
 const Modals = React.lazy(() => import('./views/notifications/modals/Modals'))
 const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'))
+//Club
+const ClubProfile = React.lazy(() => import('./admin/Club/ClubProfile'))
+const ClubMemberManagement = React.lazy(() => import('./admin/Club/ClubMemberManagement'))
+const ClubPracticeSessionManagement = React.lazy(() => import('./admin/Club/ClubPracticeSessionManagement'))
+//Category
+const CategoryListPage = React.lazy(() => import('./admin/Category/CategoryListPage'))
+
+//Contact
+ 
+const ContactMessage = React.lazy(() => import('./admin/Contact/ContactMessage'))
 
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
+
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -123,12 +137,21 @@ const routes = [
   { path: '/user/my-profile', name: 'Cập Nhật Hồ Sơ', element: ProfilePage },
   { path: '/user/change-pass', name: 'Đổi mật khẩu', element: ChangePassword },
   { path: '/admin/customers', name: 'Khách hàng', element: CustomerListPage },
+  { path: '/admin/customer-statistics', name: 'Thống Kê Nhập Liệu', element: CustomerStatistics },
+
   { path: '/admin/customers/happy-birthday', name: 'Sinh Nhật Gần Nhất', element: BirthdayCardPagination },
   { path: '/admin/departments', name: 'Phòng ban', element: DepartmentListPage },
   { path: '/admin/department-customer', name: 'Khách Hàng Phòng Ban', element: DepartmentCustomerListPage },
   { path: '/admin/articles', name: 'Quản lý bài báo', element: ArticleListPage },
   { path: '/admin/articles/:articleId/contents', name: 'Chi tiết bài báo', element: ArticleContentListPage },
   { path: '/admin/config-system', name: 'Cấu hình hệ thống', element: ConfigListPage },
+  { path: '/club/club-profile', name: 'Hồ Sơ CLB', element: ClubProfile },
+  { path: '/club/club-members', name: 'Hồ Sơ Thành Viên', element: ClubMemberManagement },
+  { path: '/club/matches-trainning', name: 'Kết Quả Tập Luyện', element: ClubPracticeSessionManagement },
+  { path: '/admin/category', name: 'Phân Loại', element: CategoryListPage },
+  { path: '/admin/contact-message', name: 'Thông tin liên hệ', element: ContactMessage },
+  { path: '/admin/company', name: 'Danh sách công ty', element: CompanyManagement },
+
 
 
 ]

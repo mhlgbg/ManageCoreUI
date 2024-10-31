@@ -18,6 +18,7 @@ const ResetPasswordPage = React.lazy(() => import('./views/pages/login/ResetPass
 const Register = React.lazy(() => import('./views/pages/register/Register'))
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'))
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
+const BirthdayCard = React.lazy(() => import('./admin/Customer/BirthdayCard'))
 
 const App = () => {
   const { isColorModeSet, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
@@ -50,6 +51,7 @@ const App = () => {
           <Routes>
             {/* Các trang không yêu cầu đăng nhập */}
             <Route exact path="/login" name="Login Page" element={<Login />} />
+            <Route exact path="/birthday-card" name="Thiệp chúc mừng sinh nhật" element={<BirthdayCard />} />
             <Route exact path="/forgot-pass" name="Quân mật khẩu" element={<ForgotPasswordPage />} />
             <Route exact path="/reset-password/:token" name="Đặt lại mật khẩu" element={<ResetPasswordPage />} />
             <Route exact path="/register" name="Register Page" element={<Register />} />

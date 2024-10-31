@@ -23,15 +23,18 @@ import { useNavigate } from 'react-router-dom';
 
 const CustomerListPage = () => {
     const [customers, setCustomers] = useState([]);
+    const [companies, setCompanies] = useState([]); // Danh sách công ty
     const [newCustomer, setNewCustomer] = useState({
         customerCode: '',
         fullName: '',
         phone: '',
         email: '',
         birthday: '',
+        gender: 'Nam', // Mặc định là 'Nam'
         avatar: '',
         status: 'pending',
-        note: ''
+        note: '',
+        company: '' // Thêm thuộc tính công ty
     });
     const [todos, setTodos] = useState([]);  // Danh sách todo cho khách hàng hiện tại
     const [newTodo, setNewTodo] = useState({ title: '', dueDate: '', notes: '' });
@@ -48,6 +51,7 @@ const CustomerListPage = () => {
 
     useEffect(() => {
         fetchCustomers();
+        fetchCompanies(); // Lấy danh sách công ty
     }, [currentPage, search]);
 
     const fetchCustomers = async () => {
@@ -55,23 +59,44 @@ const CustomerListPage = () => {
         setCustomers(response.data.customers);
         setTotalPages(response.data.totalPages);
     };
+    // Lấy danh sách Todo cho một khách hàng
+    const fetchCustomerTodos = async (customerId) => {
+        try {
+            const response = await axios.get(`/customers/${customerId}/todos`);
+            setTodos(response.data); // Lưu dữ liệu vào state
+            setCurrentCustomerId(customerId);
+            setShowTodoModal(true);
+        } catch (error) {
+            console.error('Error fetching todos:', error);
+        }
+    };
+    const fetchCompanies = async () => {
+        // Gọi API để lấy danh sách các công ty
+        const response = await axios.get('/companies/all');
+        setCompanies(response.data); // Giả định API trả về danh sách các công ty trong response.data.companies
+    };
 
     // Thêm hoặc cập nhật khách hàng
+    // Cập nhật hàm lưu khách hàng (thêm hoặc sửa)
     const handleSaveCustomer = async () => {
         try {
+            console.log("Editing Customer ID:", editingCustomer?._id); // Kiểm tra ID trước khi gửi API
+
             const formData = new FormData();
             Object.keys(newCustomer).forEach(key => {
                 formData.append(key, newCustomer[key]);
             });
 
-            if (editingCustomer) {
+            if (editingCustomer && editingCustomer._id) {
+                // Nếu đang chỉnh sửa, gọi API cập nhật
                 await axios.put(`/customers/${editingCustomer._id}`, formData);
             } else {
+                // Nếu không có `editingCustomer`, gọi API tạo mới
                 await axios.post('/customers', formData);
             }
 
             setNewCustomer({
-                customerCode: '', fullName: '', phone: '', email: '', birthday: '', avatar: '', status: 'pending', note: ''
+                customerCode: '', fullName: '', phone: '', email: '', birthday: '', gender: 'Nam', avatar: '', status: 'pending', note: '', company: ''
             });
 
             setShowModal(false);
@@ -100,10 +125,20 @@ const CustomerListPage = () => {
 
     // Mở Modal cho thêm hoặc sửa
     const openModal = (customer = null) => {
-        setEditingCustomer(customer);
-        setNewCustomer(customer || {
-            customerCode: '', fullName: '', phone: '', email: '', birthday: '', avatar: '', status: 'pending', note: ''
-        });
+        if (customer && customer._id) {
+            setEditingCustomer(customer);
+            setNewCustomer({
+                ...customer,
+                birthday: customer.birthday ? new Date(customer.birthday).toISOString().substring(0, 10) : '',
+                company: customer.company || '', // Đặt ID công ty nếu có
+                gender: customer.gender || 'Nam'
+            });
+        } else {
+            setEditingCustomer(null);
+            setNewCustomer({
+                customerCode: '', fullName: '', phone: '', email: '', birthday: '', gender: 'Nam', avatar: '', status: 'pending', note: '', company: ''
+            });
+        }
         setShowModal(true);
     };
 
@@ -112,35 +147,6 @@ const CustomerListPage = () => {
         setEditingCustomer(null);
         setShowModal(false);
     };
-
-    // Xác nhận xóa
-    const confirmDelete = (id) => {
-        setDeleteId(id);
-    };
-
-    // Xử lý tìm kiếm
-    const handleSearchChange = (e) => {
-        setSearch(e.target.value);
-        setCurrentPage(1);  // Khi tìm kiếm, reset về trang 1
-    };
-
-    // Phân trang
-    const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
-
-    // Lấy danh sách Todo cho một khách hàng
-    const fetchCustomerTodos = async (customerId) => {
-        try {
-            const response = await axios.get(`/customers/${customerId}/todos`);
-            setTodos(response.data); // Lưu dữ liệu vào state
-            setCurrentCustomerId(customerId);
-            setShowTodoModal(true);
-        } catch (error) {
-            console.error('Error fetching todos:', error);
-        }
-    };
-
     // Thêm hoặc cập nhật ToDo item
     const handleSaveTodo = async () => {
         if (editingTodo) {
@@ -164,6 +170,22 @@ const CustomerListPage = () => {
         fetchCustomerTodos(customer._id);
     };
 
+    // Xác nhận xóa
+    const confirmDelete = (id) => {
+        setDeleteId(id);
+    };
+
+    // Xử lý tìm kiếm
+    const handleSearchChange = (e) => {
+        setSearch(e.target.value);
+        setCurrentPage(1);  // Khi tìm kiếm, reset về trang 1
+    };
+
+    // Phân trang
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
     return (
         <div>
             <h2 className="my-4">Customer Management</h2>
@@ -177,10 +199,6 @@ const CustomerListPage = () => {
                 className="mb-3"
             />
 
-            {
-                /*<CButton color="primary" className="mb-4" onClick={() => openModal()}>Create New Customer</CButton>*/
-            }
-
             <h3>Existing Customers</h3>
             <CTable striped hover>
                 <CTableHead>
@@ -188,6 +206,8 @@ const CustomerListPage = () => {
                         <CTableHeaderCell>Avatar</CTableHeaderCell>
                         <CTableHeaderCell>Code</CTableHeaderCell>
                         <CTableHeaderCell>Name</CTableHeaderCell>
+                        <CTableHeaderCell>Gender</CTableHeaderCell>
+                        <CTableHeaderCell>Company</CTableHeaderCell> {/* Thêm cột công ty */}
                         <CTableHeaderCell>DoB</CTableHeaderCell>
                         <CTableHeaderCell>Phone</CTableHeaderCell>
                         <CTableHeaderCell>Email</CTableHeaderCell>
@@ -208,6 +228,8 @@ const CustomerListPage = () => {
                                 </CTableDataCell>
                                 <CTableDataCell>{customer.customerCode}</CTableDataCell>
                                 <CTableDataCell>{customer.fullName}</CTableDataCell>
+                                <CTableDataCell>{customer.gender}</CTableDataCell>
+                                <CTableDataCell>{customer.companyName}</CTableDataCell> {/* Hiển thị tên công ty */}
                                 <CTableDataCell>{customer.birthday ? new Date(customer.birthday).toLocaleDateString() : 'N/A'}</CTableDataCell>
                                 <CTableDataCell>{customer.phone}</CTableDataCell>
                                 <CTableDataCell>{customer.email}</CTableDataCell>
@@ -216,12 +238,13 @@ const CustomerListPage = () => {
                                     <CButton color="warning" className="me-2" onClick={() => openModal(customer)}>Edit</CButton>
                                     <CButton color="danger" onClick={() => confirmDelete(customer._id)}>Delete</CButton>
                                     <CButton color="info" onClick={() => openTodoModal(customer)}>ToDo List</CButton>
+
                                 </CTableDataCell>
                             </CTableRow>
                         ))
                     ) : (
                         <CTableRow>
-                            <CTableDataCell colSpan="8" className="text-center">No customers found.</CTableDataCell>
+                            <CTableDataCell colSpan="9" className="text-center">No customers found.</CTableDataCell>
                         </CTableRow>
                     )}
                 </CTableBody>
@@ -245,42 +268,35 @@ const CustomerListPage = () => {
                 <CModalHeader closeButton>
                     <CModalTitle>{editingCustomer ? 'Edit Customer' : 'Create New Customer'}</CModalTitle>
                 </CModalHeader>
-                <CModalBody onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault(); // Ngăn chặn hành vi mặc định của phím Enter
-                        handleSaveCustomer(); // Gọi hàm lưu khi nhấn Enter
-                    }
-                }}>
+                <CModalBody>
                     <CForm>
                         <CFormSelect
-                            label="Customer Type"
-                            value={newCustomer.customerType || ''}  // Đảm bảo không có giá trị null
-                            onChange={(e) => setNewCustomer({ ...newCustomer, customerType: e.target.value })}
+                            label="Company"
+                            value={newCustomer.company || ''}  // Giá trị công ty hiện tại
+                            onChange={(e) => setNewCustomer({ ...newCustomer, company: e.target.value })}
                         >
-                            <option value="">Select Type</option>
-                            <option value="SVG">Siêu Việt Group (SVG)</option>
-                            <option value="HAN">Hãng (HAN)</option>
-                            <option value="NPP">Nhà phân phối (NPP)</option>
-                            <option value="SSI">SSI</option>
-                            <option value="SMD">Đại lý phân phối (SMD)</option>
-                            <option value="EUR">EUR</option>
-                            <option value="OTH">Khác (OTH)</option>
+                            <option value="">Select Company</option>
+                            {companies.map((company) => (
+                                <option key={company._id} value={company._id}>{company.name}</option>
+                            ))}
                         </CFormSelect>
 
-                        {editingCustomer && (
-                            <CFormInput
-                                type="text"
-                                label="Customer Code"
-                                value={newCustomer.customerCode || ''}  // Đảm bảo không có giá trị null
-                                readOnly  // Không cho phép chỉnh sửa mã khách hàng
-                            />
-                        )}
+                        {/* Các trường khác của khách hàng */}
                         <CFormInput
                             type="text"
                             label="Full Name"
                             value={newCustomer.fullName}
                             onChange={(e) => setNewCustomer({ ...newCustomer, fullName: e.target.value })}
                         />
+                        <CFormSelect
+                            label="Gender"
+                            value={newCustomer.gender}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, gender: e.target.value })}
+                        >
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </CFormSelect>
                         <CFormInput
                             type="text"
                             label="Phone"
@@ -296,7 +312,7 @@ const CustomerListPage = () => {
                         <CFormInput
                             type="date"
                             label="Birthday"
-                            value={newCustomer.birthday ? new Date(newCustomer.birthday).toISOString().substring(0, 10) : ''}  // Đảm bảo định dạng YYYY-MM-DD
+                            value={newCustomer.birthday ? new Date(newCustomer.birthday).toISOString().substring(0, 10) : ''}
                             onChange={(e) => setNewCustomer({ ...newCustomer, birthday: e.target.value })}
                         />
                         <CFormInput type="file" label="Avatar" onChange={handleFileChange} />
@@ -318,19 +334,6 @@ const CustomerListPage = () => {
                     </CButton>
                 </CModalFooter>
             </CModal>
-
-            {/* Modal xác nhận xóa */}
-            <CModal visible={!!deleteId} onClose={() => setDeleteId(null)} backdrop="static">
-                <CModalHeader closeButton>
-                    <CModalTitle>Confirm Deletion</CModalTitle>
-                </CModalHeader>
-                <CModalBody>Are you sure you want to delete this customer?</CModalBody>
-                <CModalFooter>
-                    <CButton color="secondary" onClick={() => setDeleteId(null)}>Cancel</CButton>
-                    <CButton color="danger" onClick={() => handleDeleteCustomer(deleteId)}>Delete</CButton>
-                </CModalFooter>
-            </CModal>
-
             {/* Modal ToDo List */}
             <CModal visible={showTodoModal} onClose={() => setShowTodoModal(false)} backdrop="static">
                 <CModalHeader closeButton>

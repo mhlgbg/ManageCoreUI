@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import axios from '../../api/api';
 import './BirthdayCardPagination.css' // Import the CSS file
 import {
-  CAvatar,
   CCard,
   CCardBody,
   CCol,
@@ -40,23 +39,18 @@ const BirthdayCardPagination = () => {
           <CCol key={customer._id} sm={4}>
             <CCard className="mb-4 text-center birthday-card">
               <CCardBody className="birthday-card-body">
-                
-                  <div className="candle-container">
-                    <div className="flame"></div>
-                    <div className="candle">
-                      <div className="wick"></div>
-                    </div>
-                  </div>
-                
                 <h5>Happy Birthday {customer.fullName}</h5>
+                <p>{customer.companyName || 'N/A'}</p>
                 <p>{new Date(customer.birthday).toLocaleDateString('vi-VN')}</p>
+                <p>{customer.email}</p>
+                <p>{customer.phone}</p>
+                
               </CCardBody>
             </CCard>
           </CCol>
         ))}
       </CRow>
 
-      {/* Pagination */}
       <CPagination align="center" aria-label="Page navigation">
         <CPaginationItem disabled={page === 1} onClick={() => setPage(page - 1)}>
           Previous

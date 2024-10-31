@@ -24,6 +24,7 @@ const DepartmentCustomerListPage = () => {
     const [departments, setDepartments] = useState([]);
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [customers, setCustomers] = useState([]);
+    const [companies, setCompanies] = useState([]); // Thêm danh sách công ty
     const [errorMessage, setErrorMessage] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -32,11 +33,23 @@ const DepartmentCustomerListPage = () => {
     const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
     const [totalPages, setTotalPages] = useState(1); // Tổng số trang
     const [file, setFile] = useState(null); // File avatar
+    const [searchText, setSearchText] = useState(''); // Thêm state cho từ khóa tìm kiếm
 
     useEffect(() => {
         fetchDepartments();
+        fetchCompanies(); // Gọi API để lấy danh sách công ty
     }, []);
 
+    // Hàm lấy danh sách công ty
+    const fetchCompanies = async () => {
+        try {
+            const response = await axios.get('/companies/all');
+            setCompanies(response.data);
+        } catch (error) {
+            setErrorMessage('Có lỗi xảy ra khi tải danh sách công ty.');
+            console.error('Error fetching companies:', error);
+        }
+    };
     // Hàm lấy danh sách phòng ban
     const fetchDepartments = async () => {
         try {
@@ -55,13 +68,21 @@ const DepartmentCustomerListPage = () => {
     };
 
     // Hàm lấy danh sách khách hàng của phòng ban với phân trang
-    const fetchCustomers = async (departmentId, page = 1) => {
+    const fetchCustomers = async (departmentId, page = 1, search = searchText) => {
+        if (!departmentId) {
+            setErrorMessage("Phòng ban không được xác định.");
+            return;
+        }
+
         try {
-            const response = await axios.get(`/department-customer/departments/${departmentId}/customers?page=${page}&limit=12`);
+            const response = await axios.get(`/department-customer/departments/${departmentId}/customers`, {
+                params: { page, limit: 12, search }
+            });
+
             if (response.data && Array.isArray(response.data.customers)) {
                 setCustomers(response.data.customers);
-                setTotalPages(response.data.totalPages); // Cập nhật tổng số trang
-                setCurrentPage(response.data.currentPage); // Cập nhật trang hiện tại
+                setTotalPages(response.data.totalPages);
+                setCurrentPage(response.data.currentPage);
             } else {
                 setCustomers([]);
             }
@@ -88,35 +109,48 @@ const DepartmentCustomerListPage = () => {
     // Mở modal thêm hoặc sửa khách hàng
     const openModal = (customer = null) => {
         if (customer) {
-            // Định dạng lại ngày sinh để tương thích với input type="date"
-            const formattedBirthday = customer.birthday ? new Date(customer.birthday).toISOString().split('T')[0] : '';
             setCurrentCustomer({
-                ...customer,
-                birthday: formattedBirthday // Đặt lại định dạng ngày sinh
+                id: customer._id, // Đảm bảo lấy _id từ customer
+                customerCode: customer.customerCode,
+                fullName: customer.fullName,
+                gender: customer.gender || 'Nam',
+                phone: customer.phone,
+                email: customer.email,
+                birthday: customer.birthday ? new Date(customer.birthday).toISOString().split('T')[0] : '',
+                status: customer.status,
+                note: customer.note,
+                company: customer.company?._id || '',
+                avatar: customer.avatar
             });
             setModalType('edit');
         } else {
-            // Tạo đối tượng khách hàng trống khi thêm mới
             setCurrentCustomer({
-                customerCode: '', // Mã sẽ được tạo ở API, không cần từ frontend
+                customerCode: '',
                 fullName: '',
                 phone: '',
                 email: '',
                 birthday: '',
+                gender: 'Nam',
                 avatar: '',
                 note: '',
-                status: 'pending'
+                status: 'pending',
+                company: ''
             });
             setModalType('add');
         }
         setShowModal(true);
     };
-
     // Xử lý thay đổi file avatar
     const handleFileChange = (e) => {
         setFile(e.target.files[0]); // Lưu file ảnh vào state
     };
+    const handleSearchChange = (e) => {
+        setSearchText(e.target.value);
+    };
 
+    const handleSearch = () => {
+        fetchCustomers(selectedDepartment, 1, searchText); // Tìm lại từ trang đầu tiên với điều kiện tìm kiếm
+    };
     // Đóng modal
     const closeModal = () => {
         setShowModal(false);
@@ -128,8 +162,14 @@ const DepartmentCustomerListPage = () => {
     const saveCustomer = async () => {
         try {
             const formData = new FormData();
-            Object.keys(currentCustomer).forEach(key => {
-                formData.append(key, currentCustomer[key]);
+
+            Object.keys(currentCustomer).forEach((key) => {
+                // Kiểm tra và xử lý riêng cho `company` để chỉ lấy `_id`
+                if (key === 'company' && typeof currentCustomer.company === 'object') {
+                    formData.append(key, currentCustomer.company._id || ''); // Lấy _id nếu có
+                } else {
+                    formData.append(key, currentCustomer[key]);
+                }
             });
 
             if (file) {
@@ -137,13 +177,12 @@ const DepartmentCustomerListPage = () => {
             }
 
             if (modalType === 'add') {
-                const { customerCode, ...customerData } = currentCustomer;
                 await axios.post(`/department-customer/departments/${selectedDepartment}/customers`, formData);
             } else if (modalType === 'edit') {
                 await axios.put(`/department-customer/departments/customers/${currentCustomer.id}`, formData);
             }
 
-            fetchCustomers(selectedDepartment); // Tải lại danh sách khách hàng sau khi thêm/sửa
+            fetchCustomers(selectedDepartment, currentPage); // Tải lại danh sách khách hàng sau khi thêm/sửa
             closeModal();
         } catch (error) {
             setErrorMessage('Có lỗi xảy ra khi lưu thông tin khách hàng.');
@@ -176,6 +215,7 @@ const DepartmentCustomerListPage = () => {
             {/* Thông báo khi không có phòng ban */}
             {errorMessage && <CAlert color="danger">{errorMessage}</CAlert>}
 
+
             {/* Chọn phòng ban */}
             {departments.length > 0 && (
                 <CFormSelect
@@ -192,6 +232,15 @@ const DepartmentCustomerListPage = () => {
                 </CFormSelect>
             )}
 
+            {/* Ô tìm kiếm khách hàng */}
+            <CFormInput
+                type="text"
+                placeholder="Tìm kiếm khách hàng"
+                value={searchText}
+                onChange={handleSearchChange}
+                onBlur={handleSearch}
+                className="mb-3"
+            />
             {/* Nút Thêm khách hàng chỉ hiện khi đã chọn phòng ban */}
             {selectedDepartment && (
                 <CButton color="primary" className="mb-3" onClick={() => openModal(null)}>
@@ -206,6 +255,8 @@ const DepartmentCustomerListPage = () => {
                         <CTableRow>
                             <CTableHeaderCell>Mã khách hàng</CTableHeaderCell>
                             <CTableHeaderCell>Họ tên</CTableHeaderCell>
+                            <CTableHeaderCell>Giới tính</CTableHeaderCell>
+                            <CTableHeaderCell>Công ty</CTableHeaderCell>
                             <CTableHeaderCell>Điện thoại</CTableHeaderCell>
                             <CTableHeaderCell>Email</CTableHeaderCell>
                             <CTableHeaderCell>Ngày sinh</CTableHeaderCell>
@@ -216,9 +267,11 @@ const DepartmentCustomerListPage = () => {
                     </CTableHead>
                     <CTableBody>
                         {customers.map((customer) => (
-                            <CTableRow key={customer.id}>
+                            <CTableRow key={customer._id}>
                                 <CTableDataCell>{customer.customerCode}</CTableDataCell>
                                 <CTableDataCell>{customer.fullName}</CTableDataCell>
+                                <CTableDataCell>{customer.gender}</CTableDataCell> {/* Hiển thị giới tính */}
+                                <CTableDataCell>{customer.company?.name || 'N/A'}</CTableDataCell>
                                 <CTableDataCell>{customer.phone}</CTableDataCell>
                                 <CTableDataCell>{customer.email}</CTableDataCell>
                                 <CTableDataCell>{customer.birthday ? new Date(customer.birthday).toLocaleDateString() : 'N/A'}</CTableDataCell>
@@ -279,6 +332,33 @@ const DepartmentCustomerListPage = () => {
                         value={currentCustomer?.fullName || ''}
                         onChange={(e) => setCurrentCustomer({ ...currentCustomer, fullName: e.target.value })}
                     />
+                    <CFormSelect
+                        label="Giới tính"
+                        value={currentCustomer?.gender || 'Nam'}
+                        onChange={(e) => setCurrentCustomer({ ...currentCustomer, gender: e.target.value })}
+                    >
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </CFormSelect>
+                    <CFormSelect
+                        label="Công ty"
+                        value={currentCustomer?.company || ''} // Truyền giá trị _id hiện tại hoặc giá trị rỗng
+                        onChange={(e) =>
+                            setCurrentCustomer({
+                                ...currentCustomer,
+                                company: e.target.value // Cập nhật trực tiếp ID công ty khi có sự thay đổi
+                            })
+                        }
+                    >
+                        <option value="">Chọn công ty</option>
+                        {companies.map((company) => (
+                            <option key={company._id} value={company._id}>
+                                {company.name}
+                            </option>
+                        ))}
+                    </CFormSelect>
+
                     <CFormInput
                         type="text"
                         label="Điện thoại"
