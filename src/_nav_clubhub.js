@@ -41,6 +41,13 @@ const _nav = (userRoles) => [
   },
   {
     component: CNavItem,
+    name: 'Thông tin liên hệ',
+    to: '/admin/contact-message',
+    icon: <CIcon icon={cilChatBubble} customClassName="nav-icon" />,
+    visible: ['admin', 'editor'],  // Chỉ hiển thị nếu có quyền
+  },
+  {
+    component: CNavItem,
     name: 'Phân loại',
     to: '/admin/category',
     icon: <CIcon icon={cilList} customClassName="nav-icon" />,
@@ -50,6 +57,13 @@ const _nav = (userRoles) => [
     component: CNavTitle,
     name: 'Quản trị',
     visible: ['admin', 'manager'],  // Chỉ hiển thị nếu người dùng có quyền 'admin' hoặc 'manager'
+  },
+  {
+    component: CNavItem,
+    name: 'Cấu hình hệ thống',
+    to: '/admin/config-system',
+    icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+    visible: ['admin'],  // Chỉ hiển thị nếu có quyền
   },
   {
     component: CNavItem,
@@ -63,7 +77,7 @@ const _nav = (userRoles) => [
     name: 'Nhân Sự',
     to: '/admin/employees',
     icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
-    visible: ['admin', 'hr'],  // Chỉ hiển thị nếu có quyền
+    visible: ['admin'],  // Chỉ hiển thị nếu có quyền
   },
   {
     component: CNavItem,
@@ -112,7 +126,32 @@ const _nav = (userRoles) => [
     icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
     visible: ['admin', 'manager', 'cus', 'user'],  // Hiển thị cho tất cả vai trò
   },
-  
+  {
+    component: CNavTitle,
+    name: 'Câu Lạc Bộ',
+    visible: ['admin', 'manager',],  // Chỉ hiển thị nếu có quyền
+  },  
+  {
+    component: CNavItem,
+    name: 'Hồ Sơ CLB',
+    to: '/club/club-profile',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    visible: ['admin', 'manager'],  // Hiển thị cho tất cả vai trò
+  },
+  {
+    component: CNavItem,
+    name: 'Hồ Sơ Thành Viên',
+    to: '/club/club-members ',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    visible: ['admin', 'manager'],  // Hiển thị cho tất cả vai trò
+  },
+  {
+    component: CNavItem,
+    name: 'Kết Quả Tập Luyện',
+    to: '/club/matches-trainning',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    visible: ['admin', 'manager'],  // Hiển thị cho tất cả vai trò
+  },
 ]
 
 export default _nav

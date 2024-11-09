@@ -314,10 +314,12 @@ const UserManagementForm = () => {
                 })
               }
             >
-              <option value="user">User</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
-              <option value="cus">Customer care</option>
+              <option value="user">Người dùng thông thường</option>
+              <option value="admin">Quản trị</option>
+              <option value="hr">Quản lý Nhân sự</option>
+              <option value="cus">CSKH</option>
+              <option value="teacher">Giáo viên</option>
+              <option value="manager">Quản lý</option>
             </CFormSelect>
             <CFormInput
               type="password"

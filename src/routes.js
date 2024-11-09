@@ -29,6 +29,20 @@ const CompanyManagement = React.lazy(() => import('./admin/Company/CompanyManage
 //Staff
 const DepartmentCustomerListPage = React.lazy(() => import('./admin/Department/DepartmentCustomerListPage'))
 
+//Study
+const TaskListPage = React.lazy(() => import('./study/Task/TaskListPage'))
+const ClassManagement = React.lazy(() => import('./study/Class/ClassManagement'))
+const ScheduleManagement = React.lazy(() => import('./study/Schedule/ScheduleManagement'))
+const Classroom = React.lazy(() => import('./study/Class/Classroom'))
+const ClassReport = React.lazy(() => import('./study/Schedule/ClassReport'))
+
+//Student
+const StudentSchedule = React.lazy(() => import('./study/Student/StudentSchedule'))
+
+const StudentTask = React.lazy(() => import('./study/Student/StudentTask'));
+const ListStudentTaskComment = React.lazy(() => import('./study/Student/ListStudentTaskComment'));
+const UserGradeCard = React.lazy(() => import('./study/Student/UserGradeCard'));
+
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
@@ -80,11 +94,13 @@ const ClubPracticeSessionManagement = React.lazy(() => import('./admin/Club/Club
 //Category
 const CategoryListPage = React.lazy(() => import('./admin/Category/CategoryListPage'))
 
-//Contact
- 
+//Contact 
 const ContactMessage = React.lazy(() => import('./admin/Contact/ContactMessage'))
-
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
+//Employee
+
+const EmployeeList = React.lazy(() => import('./admin/Employee/EmployeeList'));
+const EmployeeForm = React.lazy(() => import('./admin/Employee/EmployeeForm'));
 
 
 const routes = [
@@ -152,6 +168,18 @@ const routes = [
   { path: '/admin/contact-message', name: 'Thông tin liên hệ', element: ContactMessage },
   { path: '/admin/company', name: 'Danh sách công ty', element: CompanyManagement },
 
+  { path: '/study/tasks', name: 'Danh sách nhiệm vụ', element: TaskListPage },
+  { path: '/study/classes', name: 'Các Lớp Học', element: ClassManagement },
+  { path: '/study/schedules', name: 'Lịch Học', element: ScheduleManagement },
+  { path: '/study/classrooms', name: 'Classroom Command Center', element: Classroom },
+  { path: '/study/class-report/:scheduleId', name: 'Classroom Report', element: ClassReport },
+  
+  { path: '/student/schedules', name: 'Schedule', element: StudentSchedule },
+  { path: '/student/my-tasks', name: 'Schedule', element: StudentTask },
+  { path: '/student-task/:userTaskId/comments', name: 'ListStudentTaskComment', element: ListStudentTaskComment },
+  { path: '/student/my-grade', name: 'Stduent Grades', element: UserGradeCard },
+  { path: '/admin/employees/:employeeId', name: 'Employee Form', element: EmployeeForm },
+  { path: '/admin/employees', name: 'Employee List', element: EmployeeList },
 
 
 ]
