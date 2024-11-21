@@ -1,12 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import {
+    CButton,
+    CForm,
+    CFormLabel,
+    CFormInput,
+    CRow,
+    CCol,
+    CTable,
+    CTableBody,
+    CTableRow,
+    CTableDataCell,
+    CTableHeaderCell,
+    CTableHead,
+    CModal,
+    CModalBody,
+    CModalFooter,
+    CModalHeader,
+    CModalTitle,
+} from '@coreui/react';
 import axios from '../../api/api';
-import { CButton, CForm, CFormLabel, CFormInput, CRow, CCol, CTable, CTableBody, CTableRow, CTableDataCell, CTableHeaderCell, CTableHead, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react';
 
 const EmployeeEducationAndCertifications = ({ employeeId, educationAndCertification }) => {
     const [formValues, setFormValues] = useState(educationAndCertification || {});
     const [certifications, setCertifications] = useState(educationAndCertification?.certifications || []);
     const [newCertification, setNewCertification] = useState({ name: '', issuedBy: '', issueDate: '' });
-    const [showModal, setShowModal] = useState(false);
+    const [showModal, setShowModal] = useState(false); // Modal trạng thái
 
     useEffect(() => {
         setFormValues(educationAndCertification || {});
@@ -32,7 +50,7 @@ const EmployeeEducationAndCertifications = ({ employeeId, educationAndCertificat
     const addCertification = () => {
         setCertifications([...certifications, newCertification]);
         setNewCertification({ name: '', issuedBy: '', issueDate: '' });
-        setShowModal(false);
+        setShowModal(false); // Đóng modal
     };
 
     const removeCertification = (index) => {
@@ -43,9 +61,10 @@ const EmployeeEducationAndCertifications = ({ employeeId, educationAndCertificat
     const handleSaveEducationAndCertifications = async () => {
         try {
             await axios.put(`/employees/${employeeId}/educationAndCertifications`, { ...formValues, certifications });
-            alert('Education and certifications updated successfully');
+            alert('Cập nhật thành công.');
         } catch (error) {
             console.error('Error updating education and certifications:', error);
+            alert('Có lỗi xảy ra khi lưu.');
         }
     };
 
@@ -118,40 +137,66 @@ const EmployeeEducationAndCertifications = ({ employeeId, educationAndCertificat
                 </CTableBody>
             </CTable>
 
-            <CButton color="primary" onClick={() => setShowModal(true)}>Thêm chứng chỉ</CButton>
-            <CButton color="success" className="ms-3" onClick={handleSaveEducationAndCertifications}>Lưu</CButton>
+            <CButton color="primary" className="mt-3" onClick={() => setShowModal(true)}>
+                Thêm chứng chỉ
+            </CButton>
+            <CButton color="success" className="ms-3 mt-3" onClick={handleSaveEducationAndCertifications}>
+                Lưu
+            </CButton>
 
-            {/* Modal thêm chứng chỉ mới */}
-            <CModal visible={showModal} onClose={() => setShowModal(false)}>
-                <CModalHeader closeButton>
+            {/* Modal thêm chứng chỉ */}
+            <CModal visible={showModal} onClose={() => setShowModal(false)} backdrop="static">
+                <CModalHeader>
                     <CModalTitle>Thêm chứng chỉ</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
-                    <CFormLabel>Tên chứng chỉ</CFormLabel>
-                    <CFormInput
-                        type="text"
-                        name="name"
-                        value={newCertification.name}
-                        onChange={handleCertificationChange}
-                    />
-                    <CFormLabel>Cơ quan cấp</CFormLabel>
-                    <CFormInput
-                        type="text"
-                        name="issuedBy"
-                        value={newCertification.issuedBy}
-                        onChange={handleCertificationChange}
-                    />
-                    <CFormLabel>Ngày cấp</CFormLabel>
-                    <CFormInput
-                        type="date"
-                        name="issueDate"
-                        value={newCertification.issueDate}
-                        onChange={handleCertificationChange}
-                    />
+                    <CRow className="mb-3">
+                        <CCol sm="3">
+                            <CFormLabel>Tên chứng chỉ</CFormLabel>
+                        </CCol>
+                        <CCol sm="9">
+                            <CFormInput
+                                type="text"
+                                name="name"
+                                value={newCertification.name}
+                                onChange={handleCertificationChange}
+                            />
+                        </CCol>
+                    </CRow>
+                    <CRow className="mb-3">
+                        <CCol sm="3">
+                            <CFormLabel>Cơ quan cấp</CFormLabel>
+                        </CCol>
+                        <CCol sm="9">
+                            <CFormInput
+                                type="text"
+                                name="issuedBy"
+                                value={newCertification.issuedBy}
+                                onChange={handleCertificationChange}
+                            />
+                        </CCol>
+                    </CRow>
+                    <CRow className="mb-3">
+                        <CCol sm="3">
+                            <CFormLabel>Ngày cấp</CFormLabel>
+                        </CCol>
+                        <CCol sm="9">
+                            <CFormInput
+                                type="date"
+                                name="issueDate"
+                                value={newCertification.issueDate}
+                                onChange={handleCertificationChange}
+                            />
+                        </CCol>
+                    </CRow>
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="secondary" onClick={() => setShowModal(false)}>Hủy</CButton>
-                    <CButton color="primary" onClick={addCertification}>Thêm</CButton>
+                    <CButton color="secondary" onClick={() => setShowModal(false)}>
+                        Hủy
+                    </CButton>
+                    <CButton color="primary" onClick={addCertification}>
+                        Thêm
+                    </CButton>
                 </CModalFooter>
             </CModal>
         </CForm>

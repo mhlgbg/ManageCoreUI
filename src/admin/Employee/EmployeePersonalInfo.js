@@ -105,7 +105,45 @@ const EmployeePersonalInfo = ({ employeeId, personalInfo }) => {
                     />
                 </CCol>
             </CRow>
-            
+            <CRow className="mb-3">
+                <CCol sm="2">
+                    <CFormLabel>Ngày cấp CCCD</CFormLabel>
+                </CCol>
+                <CCol sm="10">
+                    <CFormInput
+                        type="date"
+                        name="issuedDate"
+                        value={formValues.issuedDate?.split('T')[0] || ''}
+                        onChange={handleInputChange}
+                    />
+                </CCol>
+            </CRow>
+            <CRow className="mb-3">
+                <CCol sm="2">
+                    <CFormLabel>Nơi cấp CCCD</CFormLabel>
+                </CCol>
+                <CCol sm="10">
+                    <CFormInput
+                        type="text"
+                        name="issuedPlace"
+                        value={formValues.issuedPlace || ''}
+                        onChange={handleInputChange}
+                    />
+                </CCol>
+            </CRow>
+            <CRow className="mb-3">
+                <CCol sm="2">
+                    <CFormLabel>Nguyên quán</CFormLabel>
+                </CCol>
+                <CCol sm="10">
+                    <CFormInput
+                        type="text"
+                        name="nativePlace"
+                        value={formValues.nativePlace || ''}
+                        onChange={handleInputChange}
+                    />
+                </CCol>
+            </CRow>
             <CRow className="mb-3">
                 <CCol sm="2">
                     <CFormLabel>Quốc tịch</CFormLabel>
@@ -120,19 +158,7 @@ const EmployeePersonalInfo = ({ employeeId, personalInfo }) => {
                 </CCol>
             </CRow>
 
-            <CRow className="mb-3">
-                <CCol sm="2">
-                    <CFormLabel>Địa chỉ</CFormLabel>
-                </CCol>
-                <CCol sm="10">
-                    <CFormInput
-                        type="text"
-                        name="address"
-                        value={formValues.address || 'Việt Nam'}
-                        onChange={handleInputChange}
-                    />
-                </CCol>
-            </CRow>
+            
 
             <CRow className="mb-3">
                 <CCol sm="2">
@@ -150,13 +176,26 @@ const EmployeePersonalInfo = ({ employeeId, personalInfo }) => {
 
             <CRow className="mb-3">
                 <CCol sm="2">
-                    <CFormLabel>Email</CFormLabel>
+                    <CFormLabel>Email cá nhân</CFormLabel>
                 </CCol>
                 <CCol sm="10">
                     <CFormInput
                         type="email"
                         name="email"
                         value={formValues.email || ''}
+                        onChange={handleInputChange}
+                    />
+                </CCol>
+            </CRow>
+            <CRow className="mb-3">
+                <CCol sm="2">
+                    <CFormLabel>Email Công ty</CFormLabel>
+                </CCol>
+                <CCol sm="10">
+                    <CFormInput
+                        type="text"
+                        name="companyEmail"
+                        value={formValues.companyEmail}
                         onChange={handleInputChange}
                     />
                 </CCol>

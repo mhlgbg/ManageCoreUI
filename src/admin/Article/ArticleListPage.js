@@ -44,7 +44,7 @@ const ArticleListPage = () => {
   }, [currentPage, search]);
 
   const fetchArticles = async () => {
-    const response = await axios.get(`/articles?page=${currentPage}&limit=5&search=${search}`);
+    const response = await axios.get(`/articles?page=${currentPage}&limit=12&search=${search}`);
     setArticles(response.data.articles);
     setTotalPages(response.data.totalPages);
   };
@@ -237,6 +237,19 @@ const ArticleListPage = () => {
                   setEditingArticle({ ...editingArticle, summary: e.target.value });
                 } else {
                   setNewArticle({ ...newArticle, summary: e.target.value });
+                }
+              }}
+              className="mb-3"
+            />
+            <CFormInput
+              type="date"
+              label="Release Date"
+              value={editingArticle ? editingArticle.releaseDate?.split('T')[0] : newArticle.releaseDate}
+              onChange={(e) => {
+                if (editingArticle) {
+                  setEditingArticle({ ...editingArticle, releaseDate: e.target.value });
+                } else {
+                  setNewArticle({ ...newArticle, releaseDate: e.target.value });
                 }
               }}
               className="mb-3"

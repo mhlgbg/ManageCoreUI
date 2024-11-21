@@ -3,15 +3,10 @@ import CIcon from '@coreui/icons-react'
 import {
   cilBuilding,
   cilUser,
-  cilPeople,
   cilSpeedometer,
   cilGroup,
   cilAddressBook,
   cilBirthdayCake,
-  cilText,
-  cilList,
-  cilChatBubble,
-  cilSettings,
   cilIndustry,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
@@ -30,73 +25,99 @@ const _nav = (userRoles) => [
   },
   {
     component: CNavTitle,
-    name: 'Quản Lý Bài Viết',
-    visible: ['admin', 'editor'],  // Chỉ hiển thị nếu người dùng có quyền 'admin' hoặc 'manager'
+    name: 'Student',
+    visible: ['user'],  // Chỉ hiển thị nếu có quyền
+  },  
+  {
+    component: CNavItem,
+    name: 'Schedules',
+    to: '/student/schedules',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    visible: ['user'],  // Hiển thị cho tất cả vai trò
   },
   {
     component: CNavItem,
-    name: 'Bài viết',
-    to: '/admin/articles',
-    icon: <CIcon icon={cilText} customClassName="nav-icon" />,
-    visible: ['admin', 'editor'],  // Chỉ hiển thị nếu có quyền
+    name: 'My Tasks',
+    to: '/student/my-tasks',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    visible: ['user'],  // Hiển thị cho tất cả vai trò
   },
   {
     component: CNavItem,
-    name: 'Phân loại',
-    to: '/admin/category',
-    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
-    visible: ['admin', 'editor'],  // Chỉ hiển thị nếu có quyền
+    name: 'My Grades',
+    to: '/student/my-grade',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    visible: ['user'],  // Hiển thị cho tất cả vai trò
   },
   {
     component: CNavTitle,
-    name: 'Quản trị',
+    name: 'Study',
+    visible: ['admin', 'manager', 'cus', 'user'],  // Chỉ hiển thị nếu có quyền
+  },  
+  {
+    component: CNavItem,
+    name: 'Task',
+    to: '/study/tasks',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    visible: ['admin', 'teacher'],  // Hiển thị cho tất cả vai trò
+  },
+  {
+    component: CNavItem,
+    name: 'Teaching Classes',
+    to: '/study/classrooms',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    visible: ['admin', 'teacher'],  // Hiển thị cho tất cả vai trò
+  },
+  {
+    component: CNavItem,
+    name: 'Schedule',
+    to: '/study/schedules',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    visible: ['admin'],  // Hiển thị cho tất cả vai trò
+  },
+  {
+    component: CNavItem,
+    name: 'Classes',
+    to: '/study/classes',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    visible: ['admin'],  // Hiển thị cho tất cả vai trò
+  },
+  {
+    component: CNavItem,
+    name: 'Modules',
+    to: '/study/modules',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    visible: ['admin'],  // Hiển thị cho tất cả vai trò
+  },
+  {
+    component: CNavTitle,
+    name: 'Quản Trị',
     visible: ['admin', 'manager'],  // Chỉ hiển thị nếu người dùng có quyền 'admin' hoặc 'manager'
   },
   {
     component: CNavItem,
-    name: 'Người dùng',
+    name: 'Người Dùng',
     to: '/admin/users',
-    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilGroup} customClassName="nav-icon" />,
     visible: ['admin'],  // Chỉ hiển thị nếu có quyền
   },
   {
     component: CNavItem,
-    name: 'Nhân Sự',
-    to: '/admin/employees',
-    icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
-    visible: ['admin', 'hr'],  // Chỉ hiển thị nếu có quyền
+    name: 'Thống Kê Nhập Liệu',
+    to: '/admin/customer-statistics',
+    icon: <CIcon icon={cilGroup} customClassName="nav-icon" />,
+    visible: ['admin'],  // Chỉ hiển thị nếu có quyền
   },
   {
     component: CNavItem,
-    name: 'Danh sách file',
-    to: '/admin/file-manager',
-    icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
-    visible: ['admin', 'hr'],  // Chỉ hiển thị nếu có quyền
-  },
-  {
-    component: CNavItem,
-    name: 'Địa danh',
-    to: '/admin/locations',
-    icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
-    visible: ['admin', 'hr'],  // Chỉ hiển thị nếu có quyền
-  },
-  {
-    component: CNavItem,
-    name: 'Phòng ban',
+    name: 'Phòng Ban',
     to: '/admin/departments',
     icon: <CIcon icon={cilBuilding} customClassName="nav-icon" />,
     visible: ['admin'],  // Chỉ hiển thị nếu có quyền
   },
   {
     component: CNavItem,
-    name: 'Danh Sách Công Ty',
-    to: '/admin/company',
-    icon: <CIcon icon={cilIndustry} customClassName="nav-icon" />,
-    visible: ['admin', 'cus'],  // Chỉ hiển thị nếu có quyền
-  },
-  {
-    component: CNavItem,
-    name: 'Khách hàng (quản trị)',
+    name: 'Khách Hàng (quản trị)',
     to: '/admin/customers',
     icon: <CIcon icon={cilAddressBook} customClassName="nav-icon" />,
     visible: ['admin'],  // Chỉ hiển thị nếu có quyền
@@ -110,10 +131,10 @@ const _nav = (userRoles) => [
   },
   {
     component: CNavItem,
-    name: 'Thống kê nhập liệu',
-    to: '/admin/customer-statistics',
+    name: 'Danh Sách Công Ty',
+    to: '/admin/company',
     icon: <CIcon icon={cilBirthdayCake} customClassName="nav-icon" />,
-    visible: ['admin'],  // Chỉ hiển thị nếu có quyền
+    visible: ['admin', 'cus'],  // Chỉ hiển thị nếu có quyền
   },
   {
     component: CNavTitle,

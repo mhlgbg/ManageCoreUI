@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import ReactQuill from 'react-quill';
+
 import 'react-quill/dist/quill.snow.css';
 import axios from '../../api/api';
+import TinyMCEEditor from './TinyMCEEditor'; // Thêm dòng này để import TinyMCEEditor
 import {
     CButton,
     CForm,
@@ -22,13 +23,25 @@ import {
     CTableDataCell,
 } from '@coreui/react';
 
+
 const ArticleContentListPage = () => {
     const { articleId } = useParams();
     const [contents, setContents] = useState([]);
     const [newContent, setNewContent] = useState({ contentTitle: '', contentType: 'text', contentValue: '', displayOrder: 0 });
     const [editingContent, setEditingContent] = useState(null);
     const [showModal, setShowModal] = useState(false);
-
+    const modules = {
+        toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ align: [] }],
+            ['link', 'image'],
+            ['clean'],
+            ['table'], // Nếu hỗ trợ bảng sau khi cài đặt
+        ],
+        'better-table': { operationMenu: { items: { insertColumnRight: true } } },
+    };
     useEffect(() => {
         fetchContents();
     }, []);
@@ -70,48 +83,66 @@ const ArticleContentListPage = () => {
     };
 
     const renderContentValueField = () => {
-        switch (newContent.contentType || editingContent?.contentType) {
-            case 'image':
-                return (
-                    <>
-                        <CFormLabel>Upload Image</CFormLabel>
-                        <CFormInput type="file" onChange={handleFileChange} />
-                        {editingContent?.contentValue && <img src={editingContent.contentValue} alt="Uploaded" width="100" />}
-                    </>
-                );
-            case 'html':
-                return (
-                    <>
-                        <CFormLabel>HTML Content</CFormLabel>
-                        <ReactQuill
-                            value={editingContent ? editingContent.contentValue : newContent.contentValue}
-                            onChange={(content) => {
-                                if (editingContent) {
-                                    setEditingContent({ ...editingContent, contentValue: content });
-                                } else {
-                                    setNewContent({ ...newContent, contentValue: content });
-                                }
-                            }}
-                        />
-                    </>
-                );
-            default:
-                return (
-                    <>
-                        <CFormLabel>Text or Video URL</CFormLabel>
-                        <CFormInput
-                            type="text"
-                            value={editingContent ? editingContent.contentValue : newContent.contentValue}
-                            onChange={(e) => {
-                                if (editingContent) {
-                                    setEditingContent({ ...editingContent, contentValue: e.target.value });
-                                } else {
-                                    setNewContent({ ...newContent, contentValue: e.target.value });
-                                }
-                            }}
-                        />
-                    </>
-                );
+        const contentType = editingContent ? editingContent.contentType : newContent.contentType;
+        if (contentType === 'image') {
+            return (
+                <>
+                    <CFormLabel>Upload Image</CFormLabel>
+                    <CFormInput type="file" onChange={handleFileChange} />
+                    {editingContent?.contentValue && <img src={editingContent.contentValue} alt="Uploaded" width="100" />}
+                </>
+            );
+        } else if (contentType === 'html') {
+            return (
+                <>
+                    <CFormLabel>HTML Content</CFormLabel>
+                    <TinyMCEEditor
+                        content={editingContent ? editingContent.contentValue : newContent.contentValue}
+                        setContent={(content) => {
+                            if (editingContent) {
+                                setEditingContent({ ...editingContent, contentValue: content });
+                            } else {
+                                setNewContent({ ...newContent, contentValue: content });
+                            }
+                        }}
+                    />
+                </>
+            );
+        } else if (contentType === 'pdf' || contentType === 'video') {
+            return (
+                <>
+                    <CFormLabel>{contentType === 'pdf' ? 'PDF URL' : 'Video URL'}</CFormLabel>
+                    <CFormInput
+                        type="text"
+                        placeholder={contentType === 'pdf' ? 'Enter PDF link' : 'Enter YouTube link'}
+                        value={editingContent ? editingContent.contentValue : newContent.contentValue}
+                        onChange={(e) => {
+                            if (editingContent) {
+                                setEditingContent({ ...editingContent, contentValue: e.target.value });
+                            } else {
+                                setNewContent({ ...newContent, contentValue: e.target.value });
+                            }
+                        }}
+                    />
+                </>
+            );
+        } else {
+            return (
+                <>
+                    <CFormLabel>Text Content</CFormLabel>
+                    <CFormInput
+                        type="text"
+                        value={editingContent ? editingContent.contentValue : newContent.contentValue}
+                        onChange={(e) => {
+                            if (editingContent) {
+                                setEditingContent({ ...editingContent, contentValue: e.target.value });
+                            } else {
+                                setNewContent({ ...newContent, contentValue: e.target.value });
+                            }
+                        }}
+                    />
+                </>
+            );
         }
     };
 
@@ -133,6 +164,7 @@ const ArticleContentListPage = () => {
         setEditingContent(null);
         setShowModal(false);
     };
+    
 
     return (
         <CContainer>
@@ -158,7 +190,7 @@ const ArticleContentListPage = () => {
                             <CTableDataCell>
                                 {content.contentType === 'image' ? (
                                     <img
-                                        src={`${import.meta.env.VITE_API_BASE_URL}/${content.contentValue ? content.contentValue : 'uploads/avatars/150.jpg'}`}
+                                        src={`${import.meta.env.VITE_API_BASE_URL}/${content.contentValue}`}
                                         alt="Content"
                                         width="100"
                                     />
@@ -176,7 +208,7 @@ const ArticleContentListPage = () => {
                 </CTableBody>
             </CTable>
 
-            <CModal visible={showModal} onClose={closeModal} backdrop="static">
+            <CModal visible={showModal} onClose={closeModal} backdrop="static" size="xl">
                 <CModalHeader closeButton>
                     <h5>{editingContent ? 'Edit Content' : 'Add New Content'}</h5>
                 </CModalHeader>
@@ -212,6 +244,7 @@ const ArticleContentListPage = () => {
                             <option value="html">HTML</option>
                             <option value="image">Image</option>
                             <option value="video">Video (YouTube)</option>
+                            <option value="pdf">PDF</option>
                         </CFormSelect>
 
                         {renderContentValueField()}

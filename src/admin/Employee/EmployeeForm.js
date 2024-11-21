@@ -9,6 +9,12 @@ import { CButton } from '@coreui/react';
 import EmployeePayrollInfo from './EmployeePayrollInfo';
 import EmployeeEducationAndCertifications from './EmployeeEducationAndCertifications';
 import EmployeeWorkExperience from './EmployeeWorkExperience';
+import EmployeeAddress from './EmployeeAddress';
+import EmployeeRelative from './EmployeeRelative';
+import EmployeeChildren from './EmployeeChildren';
+import EmploymentHistory from './EmploymentHistory';
+import IncomeDecisions from './IncomeDecisions';
+import EmployeeEvents from './EmployeeEvents';
 
 const EmployeeForm = () => {
     const { employeeId } = useParams();
@@ -37,13 +43,37 @@ const EmployeeForm = () => {
                     {employee && <EmployeePersonalInfo employeeId={employeeId} personalInfo={employee.personalInfo} />}
                 </div>
             </div>
-
             <div className="section-container">
-                <div className="section-header">Thông tin công việc</div>
+                <div className="section-header">Sổ địa chỉ</div>
                 <div className="section-content">
-                    {employee && <EmployeeJobInfo employeeId={employeeId} jobInfo={employee.jobInfo} />}
+                    {employee && <EmployeeAddress employeeId={employeeId} addresses={employee.addresses} />}
                 </div>
             </div>
+            <div className="section-container">
+                <div className="section-header">Thông tin người thân</div>
+                <div className="section-content">
+                    {employee && <EmployeeRelative employeeId={employeeId} relatives={employee.relatives} />}
+                </div>
+            </div>
+            <div className="section-container">
+                <div className="section-header">Thông tin về con cái</div>
+                <div className="section-content">
+                    {employee && <EmployeeChildren employeeId={employeeId} children={employee.children} />}
+                </div>
+            </div>
+            <div className="section-container">
+                <div className="section-header">Quá trình làm việc</div>
+                <div className="section-content">
+                    {employee && <EmploymentHistory employeeId={employeeId} employmentHistory={employee.employmentHistory} />}
+                </div>
+            </div>
+            <div className="section-container">
+                <div className="section-header">Quá trình lương</div>
+                <div className="section-content">
+                    {employee && <IncomeDecisions employeeId={employeeId} incomeDecisions={employee.incomeDecisions} />}
+                </div>
+            </div>
+            
             <div className="section-container">
                 <div className="section-header">Thông tin bảo hiểm và lương</div>
                 <div className="section-content">
@@ -66,6 +96,12 @@ const EmployeeForm = () => {
                         employeeId={employeeId}
                         workExperience={employee?.workExperience}
                     />
+                </div>
+            </div>
+            <div className="section-container">
+                <div className="section-header">Các sự kiện khác</div>
+                <div className="section-content">
+                    {employee && <EmployeeEvents employeeId={employeeId} employeeEvents={employee.employeeEvents} />}
                 </div>
             </div>
         </div>

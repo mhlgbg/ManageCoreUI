@@ -101,7 +101,12 @@ const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
 const EmployeeList = React.lazy(() => import('./admin/Employee/EmployeeList'));
 const EmployeeForm = React.lazy(() => import('./admin/Employee/EmployeeForm'));
+const ImageManagement = React.lazy(() => import('./admin/Image/ImageManagement'));
+const UploadedFileManager = React.lazy(() => import('./admin/UploadedFile/UploadedFileManager'));
 
+const ModuleManagement = React.lazy(() => import('./study/Module/ModuleManagement'));
+
+const LocationManagement = React.lazy(() => import('./admin/Location/LocationManagement'));
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -167,13 +172,16 @@ const routes = [
   { path: '/admin/category', name: 'Phân Loại', element: CategoryListPage },
   { path: '/admin/contact-message', name: 'Thông tin liên hệ', element: ContactMessage },
   { path: '/admin/company', name: 'Danh sách công ty', element: CompanyManagement },
+  { path: '/admin/images', name: 'Danh sách ảnh', element: ImageManagement },
+  { path: '/admin/file-manager', name: 'Danh sách file', element: UploadedFileManager },
 
   { path: '/study/tasks', name: 'Danh sách nhiệm vụ', element: TaskListPage },
   { path: '/study/classes', name: 'Các Lớp Học', element: ClassManagement },
   { path: '/study/schedules', name: 'Lịch Học', element: ScheduleManagement },
   { path: '/study/classrooms', name: 'Classroom Command Center', element: Classroom },
   { path: '/study/class-report/:scheduleId', name: 'Classroom Report', element: ClassReport },
-  
+  { path: '/study/modules', name: 'Môn học', element: ModuleManagement },
+
   { path: '/student/schedules', name: 'Schedule', element: StudentSchedule },
   { path: '/student/my-tasks', name: 'Schedule', element: StudentTask },
   { path: '/student-task/:userTaskId/comments', name: 'ListStudentTaskComment', element: ListStudentTaskComment },
@@ -181,6 +189,7 @@ const routes = [
   { path: '/admin/employees/:employeeId', name: 'Employee Form', element: EmployeeForm },
   { path: '/admin/employees', name: 'Employee List', element: EmployeeList },
 
+  { path: '/admin/locations', name: 'Location Management', element: LocationManagement },
 
 ]
 

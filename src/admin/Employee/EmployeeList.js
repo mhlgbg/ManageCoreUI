@@ -38,7 +38,7 @@ const EmployeeList = () => {
 
     const openModal = (employee = null) => {
         setCurrentEmployee(employee || {
-            personalInfo: { fullName: '', dateOfBirth: '', gender: '', email: '', phoneNumber: '', idNumber: '', avatar: '', nationality: 'Việt Nam', address: 'Việt Nam' },
+            personalInfo: { fullName: '', dateOfBirth: '', gender: '', email: '', companyEmail: '', phoneNumber: '', idNumber: '', issuedDate: '', issuedPlace: '', nativePlace: '', skypeLink: '', facebookLink: '', avatar: '', nationality: ''},
             notes: '',
             emergencyContact: { contactName: '', relationship: '', contactPhone: '' }
         });
@@ -122,7 +122,6 @@ const EmployeeList = () => {
                         <CTableHeaderCell>Điện thoại</CTableHeaderCell>
                         <CTableHeaderCell>Số CCCD</CTableHeaderCell>
                         <CTableHeaderCell>Quốc tịch</CTableHeaderCell>
-                        <CTableHeaderCell>Địa chỉ</CTableHeaderCell>
                         <CTableHeaderCell>Thao tác</CTableHeaderCell>
                     </CTableRow>
                 </CTableHead>
@@ -136,7 +135,6 @@ const EmployeeList = () => {
                             <CTableDataCell>{employee.personalInfo.phoneNumber}</CTableDataCell>
                             <CTableDataCell>{employee.personalInfo.idNumber}</CTableDataCell>
                             <CTableDataCell>{employee.personalInfo.nationality}</CTableDataCell>
-                            <CTableDataCell>{employee.personalInfo.address}</CTableDataCell>
                             <CTableDataCell>
                                 <CButton color="info" onClick={() => openModal(employee)}>Chỉnh sửa</CButton>{' '}
                                 <CButton color="danger" onClick={() => handleDelete(employee._id)}>Xóa</CButton>
@@ -157,7 +155,7 @@ const EmployeeList = () => {
             </CPagination>
 
             {/* Modal for Add/Edit */}
-            <CModal visible={modalVisible} onClose={closeModal} backdrop="static">
+            <CModal visible={modalVisible} onClose={closeModal} backdrop="static" size="lg">
                 <CModalHeader closeButton>
                     <CModalTitle>{currentEmployee?._id ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên'}</CModalTitle>
                 </CModalHeader>
@@ -185,11 +183,17 @@ const EmployeeList = () => {
                             <option value="Female">Nữ</option>
                             <option value="Other">Khác</option>
                         </CFormSelect>
-                        <CFormLabel>Email</CFormLabel>
+                        <CFormLabel>Email cá nhân</CFormLabel>
                         <CFormInput
                             type="email"
                             value={currentEmployee?.personalInfo.email || ''}
                             onChange={(e) => setCurrentEmployee({ ...currentEmployee, personalInfo: { ...currentEmployee.personalInfo, email: e.target.value } })}
+                        />
+                        <CFormLabel>Email công ty</CFormLabel>
+                        <CFormInput
+                            type="email"
+                            value={currentEmployee?.personalInfo.companyEmail || ''}
+                            onChange={(e) => setCurrentEmployee({ ...currentEmployee, personalInfo: { ...currentEmployee.personalInfo, companyEmail: e.target.value } })}
                         />
                         <CFormLabel>Điện thoại</CFormLabel>
                         <CFormInput
@@ -203,17 +207,42 @@ const EmployeeList = () => {
                             value={currentEmployee?.personalInfo.idNumber || ''}
                             onChange={(e) => setCurrentEmployee({ ...currentEmployee, personalInfo: { ...currentEmployee.personalInfo, idNumber: e.target.value } })}
                         />
+                        <CFormLabel>Ngày cấp</CFormLabel>
+                        <CFormInput
+                            type="date"
+                            value={currentEmployee?.personalInfo.issuedDate?.split('T')[0] || ''}
+                            onChange={(e) => setCurrentEmployee({ ...currentEmployee, personalInfo: { ...currentEmployee.personalInfo, issuedDate: e.target.value } })}
+                        />
+                        <CFormLabel>Nơi cấp</CFormLabel>
+                        <CFormInput
+                            type="text"
+                            value={currentEmployee?.personalInfo.issuedPlace || ''}
+                            onChange={(e) => setCurrentEmployee({ ...currentEmployee, personalInfo: { ...currentEmployee.personalInfo, issuedPlace: e.target.value } })}
+                        />
+                        <CFormLabel>Nguyên quán</CFormLabel>
+                        <CFormInput
+                            type="text"
+                            value={currentEmployee?.personalInfo.nativePlace || ''}
+                            onChange={(e) => setCurrentEmployee({ ...currentEmployee, personalInfo: { ...currentEmployee.personalInfo, nativePlace: e.target.value } })}
+                        />
                         <CFormLabel>Quốc tịch</CFormLabel>
                         <CFormInput
                             type="text"
-                            value={currentEmployee?.personalInfo.nationality || 'Việt Nam'}
+                            value={currentEmployee?.personalInfo.nationality || ''}
                             onChange={(e) => setCurrentEmployee({ ...currentEmployee, personalInfo: { ...currentEmployee.personalInfo, nationality: e.target.value } })}
                         />
-                        <CFormLabel>Địa chỉ</CFormLabel>
+                        
+                        <CFormLabel>Skype Link</CFormLabel>
                         <CFormInput
-                            type="text"
-                            value={currentEmployee?.personalInfo.address || 'Việt Nam'}
-                            onChange={(e) => setCurrentEmployee({ ...currentEmployee, personalInfo: { ...currentEmployee.personalInfo, address: e.target.value } })}
+                            type="url"
+                            value={currentEmployee?.personalInfo.skypeLink || ''}
+                            onChange={(e) => setCurrentEmployee({ ...currentEmployee, personalInfo: { ...currentEmployee.personalInfo, skypeLink: e.target.value } })}
+                        />
+                        <CFormLabel>Facebook Link</CFormLabel>
+                        <CFormInput
+                            type="url"
+                            value={currentEmployee?.personalInfo.facebookLink || ''}
+                            onChange={(e) => setCurrentEmployee({ ...currentEmployee, personalInfo: { ...currentEmployee.personalInfo, facebookLink: e.target.value } })}
                         />
                         <CFormLabel>Avatar</CFormLabel>
                         <CFormInput
@@ -258,6 +287,7 @@ const EmployeeList = () => {
                                 emergencyContact: { ...currentEmployee.emergencyContact, contactPhone: e.target.value }
                             })}
                         />
+                        
                     </CForm>
                 </CModalBody>
                 <CModalFooter>
