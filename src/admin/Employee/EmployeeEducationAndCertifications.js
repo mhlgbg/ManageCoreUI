@@ -8,10 +8,10 @@ import {
     CCol,
     CTable,
     CTableBody,
-    CTableRow,
-    CTableDataCell,
-    CTableHeaderCell,
     CTableHead,
+    CTableRow,
+    CTableHeaderCell,
+    CTableDataCell,
     CModal,
     CModalBody,
     CModalFooter,
@@ -23,13 +23,22 @@ import axios from '../../api/api';
 const EmployeeEducationAndCertifications = ({ employeeId, educationAndCertification }) => {
     const [formValues, setFormValues] = useState(educationAndCertification || {});
     const [certifications, setCertifications] = useState(educationAndCertification?.certifications || []);
-    const [newCertification, setNewCertification] = useState({ name: '', issuedBy: '', issueDate: '' });
-    const [showModal, setShowModal] = useState(false); // Modal trạng thái
+    const [newCertification, setNewCertification] = useState({ name: '', issuedBy: '', issueDate: '', fileKey: '' });
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
-        setFormValues(educationAndCertification || {});
-        setCertifications(educationAndCertification?.certifications || []);
-    }, [educationAndCertification]);
+        fetchEducationAndCertifications();
+    }, []);
+
+    const fetchEducationAndCertifications = async () => {
+        try {
+            const response = await axios.get(`/employees/${employeeId}/educationAndCertifications`);
+            setFormValues(response.data);
+            setCertifications(response.data.certifications || []);
+        } catch (error) {
+            console.error('Error fetching education and certifications:', error);
+        }
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -47,20 +56,35 @@ const EmployeeEducationAndCertifications = ({ employeeId, educationAndCertificat
         }));
     };
 
-    const addCertification = () => {
-        setCertifications([...certifications, newCertification]);
-        setNewCertification({ name: '', issuedBy: '', issueDate: '' });
-        setShowModal(false); // Đóng modal
+    const addCertification = async () => {
+        try {
+            const response = await axios.post(`/employees/${employeeId}/educationAndCertifications/certifications`, newCertification);
+            setCertifications([...certifications, response.data]);
+            setNewCertification({ name: '', issuedBy: '', issueDate: '', fileKey: '' });
+            setShowModal(false);
+        } catch (error) {
+            console.error('Error adding certification:', error);
+            alert('Không thể thêm chứng chỉ.');
+        }
     };
 
-    const removeCertification = (index) => {
-        const updatedCertifications = certifications.filter((_, i) => i !== index);
-        setCertifications(updatedCertifications);
+    const removeCertification = async (index, certificationId) => {
+        try {
+            await axios.delete(`/employees/${employeeId}/educationAndCertifications/certifications/${certificationId}`);
+            const updatedCertifications = certifications.filter((_, i) => i !== index);
+            setCertifications(updatedCertifications);
+        } catch (error) {
+            console.error('Error removing certification:', error);
+            alert('Không thể xóa chứng chỉ.');
+        }
     };
 
     const handleSaveEducationAndCertifications = async () => {
         try {
-            await axios.put(`/employees/${employeeId}/educationAndCertifications`, { ...formValues, certifications });
+            await axios.put(`/employees/${employeeId}/educationAndCertifications`, {
+                ...formValues,
+                certifications,
+            });
             alert('Cập nhật thành công.');
         } catch (error) {
             console.error('Error updating education and certifications:', error);
@@ -69,80 +93,124 @@ const EmployeeEducationAndCertifications = ({ employeeId, educationAndCertificat
     };
 
     return (
-        <CForm>
-            <CRow className="mb-3">
-                <CCol sm="2">
-                    <CFormLabel>Bằng cấp cao nhất</CFormLabel>
-                </CCol>
-                <CCol sm="10">
-                    <CFormInput
-                        type="text"
-                        name="highestDegree"
-                        value={formValues.highestDegree || ''}
-                        onChange={handleInputChange}
-                    />
-                </CCol>
-            </CRow>
+        <div>
+            <h5>Quản lý bằng cấp và chứng chỉ</h5>
+            <CForm>
+                <CRow className="mb-3">
+                    <CCol sm="2">
+                        <CFormLabel>Bằng cấp cao nhất</CFormLabel>
+                    </CCol>
+                    <CCol sm="10">
+                        <CFormInput
+                            type="text"
+                            name="highestDegree"
+                            value={formValues.highestDegree || ''}
+                            onChange={handleInputChange}
+                        />
+                    </CCol>
+                </CRow>
 
-            <CRow className="mb-3">
-                <CCol sm="2">
-                    <CFormLabel>Cơ sở đào tạo</CFormLabel>
-                </CCol>
-                <CCol sm="10">
-                    <CFormInput
-                        type="text"
-                        name="institution"
-                        value={formValues.institution || ''}
-                        onChange={handleInputChange}
-                    />
-                </CCol>
-            </CRow>
+                <CRow className="mb-3">
+                    <CCol sm="2">
+                        <CFormLabel>Cơ sở đào tạo</CFormLabel>
+                    </CCol>
+                    <CCol sm="10">
+                        <CFormInput
+                            type="text"
+                            name="institution"
+                            value={formValues.institution || ''}
+                            onChange={handleInputChange}
+                        />
+                    </CCol>
+                </CRow>
 
-            <CRow className="mb-3">
-                <CCol sm="2">
-                    <CFormLabel>Ngành học</CFormLabel>
-                </CCol>
-                <CCol sm="10">
-                    <CFormInput
-                        type="text"
-                        name="major"
-                        value={formValues.major || ''}
-                        onChange={handleInputChange}
-                    />
-                </CCol>
-            </CRow>
+                <CRow className="mb-3">
+                    <CCol sm="2">
+                        <CFormLabel>Ngành học</CFormLabel>
+                    </CCol>
+                    <CCol sm="10">
+                        <CFormInput
+                            type="text"
+                            name="major"
+                            value={formValues.major || ''}
+                            onChange={handleInputChange}
+                        />
+                    </CCol>
+                </CRow>
 
-            <CTable>
-                <CTableHead>
-                    <CTableRow>
-                        <CTableHeaderCell>Chứng chỉ</CTableHeaderCell>
-                        <CTableHeaderCell>Cơ quan cấp</CTableHeaderCell>
-                        <CTableHeaderCell>Ngày cấp</CTableHeaderCell>
-                        <CTableHeaderCell>Thao tác</CTableHeaderCell>
-                    </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                    {certifications.map((cert, index) => (
-                        <CTableRow key={index}>
-                            <CTableDataCell>{cert.name}</CTableDataCell>
-                            <CTableDataCell>{cert.issuedBy}</CTableDataCell>
-                            <CTableDataCell>{new Date(cert.issueDate).toLocaleDateString()}</CTableDataCell>
-                            <CTableDataCell>
-                                <CButton color="danger" size="sm" onClick={() => removeCertification(index)}>
-                                    Xóa
-                                </CButton>
-                            </CTableDataCell>
+                <CRow className="mb-3">
+                    <CCol sm="2">
+                        <CFormLabel>Key file quyết định</CFormLabel>
+                    </CCol>
+                    <CCol sm="10">
+                        <CFormInput
+                            type="text"
+                            name="fileKey"
+                            value={formValues.fileKey || ''}
+                            onChange={handleInputChange}
+                        />
+                        {formValues.fileKey && (
+                            <CButton
+                                className="mt-2"
+                                color="info"
+                                href={`${import.meta.env.VITE_API_BASE_URL}/api/uploaded-files/${formValues.fileKey}`}
+                                target="_blank"
+                            >
+                                View/Download
+                            </CButton>
+                        )}
+                    </CCol>
+                </CRow>
+
+                <h6>Danh sách chứng chỉ</h6>
+                <CTable striped hover>
+                    <CTableHead>
+                        <CTableRow>
+                            <CTableHeaderCell>Tên chứng chỉ</CTableHeaderCell>
+                            <CTableHeaderCell>Cơ quan cấp</CTableHeaderCell>
+                            <CTableHeaderCell>Ngày cấp</CTableHeaderCell>
+                            <CTableHeaderCell>Key file</CTableHeaderCell>
+                            <CTableHeaderCell>Thao tác</CTableHeaderCell>
                         </CTableRow>
-                    ))}
-                </CTableBody>
-            </CTable>
+                    </CTableHead>
+                    <CTableBody>
+                        {certifications.map((cert, index) => (
+                            <CTableRow key={cert._id}>
+                                <CTableDataCell>{cert.name}</CTableDataCell>
+                                <CTableDataCell>{cert.issuedBy}</CTableDataCell>
+                                <CTableDataCell>{new Date(cert.issueDate).toLocaleDateString()}</CTableDataCell>
+                                <CTableDataCell>{cert.fileKey ? (
+                                        <a
+                                            href={`${import.meta.env.VITE_API_BASE_URL}/api/uploaded-files/${cert.fileKey}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            View/Download
+                                        </a>
+                                    ) : (
+                                        'N/A'
+                                    )}</CTableDataCell>
+                                <CTableDataCell>
+                                    <CButton
+                                        color="danger"
+                                        size="sm"
+                                        onClick={() => removeCertification(index, cert._id)}
+                                    >
+                                        Xóa
+                                    </CButton>
+                                </CTableDataCell>
+                            </CTableRow>
+                        ))}
+                    </CTableBody>
+                </CTable>
 
-            <CButton color="primary" className="mt-3" onClick={() => setShowModal(true)}>
-                Thêm chứng chỉ
-            </CButton>
-            <CButton color="success" className="ms-3 mt-3" onClick={handleSaveEducationAndCertifications}>
-                Lưu
-            </CButton>
+                <CButton color="primary" className="mt-3" onClick={() => setShowModal(true)}>
+                    Thêm chứng chỉ
+                </CButton>
+                <CButton color="success" className="ms-3 mt-3" onClick={handleSaveEducationAndCertifications}>
+                    Lưu
+                </CButton>
+            </CForm>
 
             {/* Modal thêm chứng chỉ */}
             <CModal visible={showModal} onClose={() => setShowModal(false)} backdrop="static">
@@ -189,6 +257,19 @@ const EmployeeEducationAndCertifications = ({ employeeId, educationAndCertificat
                             />
                         </CCol>
                     </CRow>
+                    <CRow className="mb-3">
+                        <CCol sm="3">
+                            <CFormLabel>Key file</CFormLabel>
+                        </CCol>
+                        <CCol sm="9">
+                            <CFormInput
+                                type="text"
+                                name="fileKey"
+                                value={newCertification.fileKey}
+                                onChange={handleCertificationChange}
+                            />
+                        </CCol>
+                    </CRow>
                 </CModalBody>
                 <CModalFooter>
                     <CButton color="secondary" onClick={() => setShowModal(false)}>
@@ -199,7 +280,7 @@ const EmployeeEducationAndCertifications = ({ employeeId, educationAndCertificat
                     </CButton>
                 </CModalFooter>
             </CModal>
-        </CForm>
+        </div>
     );
 };
 

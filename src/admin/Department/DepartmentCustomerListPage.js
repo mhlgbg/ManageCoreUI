@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select'; // Import React-Select
+
 import axios from '../../api/api';
 import {
+    CForm,
     CFormSelect,
     CAlert,
     CTable,
@@ -24,7 +27,20 @@ const DepartmentCustomerListPage = () => {
     const [departments, setDepartments] = useState([]);
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [customers, setCustomers] = useState([]);
-    const [companies, setCompanies] = useState([]); // Thêm danh sách công ty
+    const [selectedCompany, setSelectedCompany] = useState(null); // Công ty được chọn
+    const [showAddCompanyModal, setShowAddCompanyModal] = useState(false); // Hiển thị modal thêm công ty
+    const [newCompany, setNewCompany] = useState({
+        name: '',
+        code: '',
+        foundedDate: '',
+        taxCode: '',
+        registrationNumber: '',
+        address: '',
+        website: '',
+        notes: '',
+    }); // Thông tin công ty mới
+    const [companies, setCompanies] = useState([]); // Danh sách công ty
+
     const [errorMessage, setErrorMessage] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -40,13 +56,20 @@ const DepartmentCustomerListPage = () => {
         fetchCompanies(); // Gọi API để lấy danh sách công ty
     }, []);
 
+    // Lọc công ty khi từ khóa thay đổi
+
+
     // Hàm lấy danh sách công ty
     const fetchCompanies = async () => {
         try {
             const response = await axios.get('/companies/all');
-            setCompanies(response.data);
+            // Chuyển đổi dữ liệu để phù hợp với react-select
+            const formattedCompanies = response.data.map((company) => ({
+                value: company._id,
+                label: company.name,
+            }));
+            setCompanies(formattedCompanies);
         } catch (error) {
-            setErrorMessage('Có lỗi xảy ra khi tải danh sách công ty.');
             console.error('Error fetching companies:', error);
         }
     };
@@ -122,6 +145,11 @@ const DepartmentCustomerListPage = () => {
                 company: customer.company?._id || '',
                 avatar: customer.avatar
             });
+            setSelectedCompany(
+                customer.company
+                    ? { value: customer.company._id, label: customer.company.name }
+                    : null
+            );
             setModalType('edit');
         } else {
             setCurrentCustomer({
@@ -136,6 +164,7 @@ const DepartmentCustomerListPage = () => {
                 status: 'pending',
                 company: ''
             });
+            setSelectedCompany(null);
             setModalType('add');
         }
         setShowModal(true);
@@ -156,6 +185,34 @@ const DepartmentCustomerListPage = () => {
         setShowModal(false);
         setCurrentCustomer(null);
         setFile(null); // Reset file
+    };
+
+    // Lưu công ty mới
+    // Lưu công ty mới
+    const handleSaveNewCompany = async () => {
+        try {
+            const response = await axios.post('/companies', newCompany);
+            const createdCompany = response.data;
+
+            // Thêm công ty mới vào danh sách
+            const newOption = { value: createdCompany._id, label: createdCompany.name };
+            setCompanies((prev) => [...prev, newOption]);
+            setSelectedCompany(newOption);
+
+            setNewCompany({
+                name: '',
+                code: '',
+                foundedDate: '',
+                taxCode: '',
+                registrationNumber: '',
+                address: '',
+                website: '',
+                notes: '',
+            }); // Reset form
+            setShowAddCompanyModal(false);
+        } catch (error) {
+            console.error('Error adding new company:', error);
+        }
     };
 
     // Lưu thông tin khách hàng
@@ -307,7 +364,7 @@ const DepartmentCustomerListPage = () => {
             </CPagination>
 
             {/* Thêm/Sửa Khách hàng */}
-            <CModal visible={showModal} onClose={closeModal} backdrop="static">
+            <CModal visible={showModal} onClose={closeModal} backdrop="static" size="lg">
                 <CModalHeader closeButton>
                     <CModalTitle>{modalType === 'add' ? 'Thêm khách hàng' : 'Sửa khách hàng'}</CModalTitle>
                 </CModalHeader>
@@ -341,23 +398,28 @@ const DepartmentCustomerListPage = () => {
                         <option value="Nữ">Nữ</option>
                         <option value="Khác">Khác</option>
                     </CFormSelect>
-                    <CFormSelect
-                        label="Công ty"
-                        value={currentCustomer?.company || ''} // Truyền giá trị _id hiện tại hoặc giá trị rỗng
-                        onChange={(e) =>
-                            setCurrentCustomer({
-                                ...currentCustomer,
-                                company: e.target.value // Cập nhật trực tiếp ID công ty khi có sự thay đổi
-                            })
-                        }
-                    >
-                        <option value="">Chọn công ty</option>
-                        {companies.map((company) => (
-                            <option key={company._id} value={company._id}>
-                                {company.name}
-                            </option>
-                        ))}
-                    </CFormSelect>
+
+                    {/* Select công ty */}
+                    <label htmlFor="company-select">Chọn công ty</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                        <div style={{ flex: '3' }}>
+                            <Select
+                                id="company-select"
+                                options={companies}
+                                value={selectedCompany}
+                                onChange={(selectedOption) => setSelectedCompany(selectedOption)}
+                                placeholder="Nhập từ khóa công ty..."
+                                isClearable
+                                isSearchable
+                            />
+                        </div>
+                        <div style={{ flex: '1' }}>
+                            <CButton color="primary" style={{ width: '100%' }} onClick={() => setShowAddCompanyModal(true)}>
+                                Thêm công ty
+                            </CButton>
+                        </div>
+                    </div>
+
 
                     <CFormInput
                         type="text"
@@ -401,6 +463,114 @@ const DepartmentCustomerListPage = () => {
                 <CModalFooter>
                     <CButton color="secondary" onClick={closeModal}>Đóng</CButton>
                     <CButton color="primary" onClick={saveCustomer}>Lưu</CButton>
+                </CModalFooter>
+            </CModal>
+
+            {/* Modal Thêm Công ty */}
+            <CModal
+                visible={showAddCompanyModal}
+                onClose={() => setShowAddCompanyModal(false)}
+                backdrop="static"
+            >
+                <CModalHeader closeButton>
+                    <CModalTitle>Thêm Công ty</CModalTitle>
+                </CModalHeader>
+                <CModalBody>
+                    <CForm>
+                        <CFormInput
+                            type="text"
+                            label="Tên Công ty"
+                            placeholder="Nhập tên công ty"
+                            value={newCompany.name}
+                            onChange={(e) =>
+                                setNewCompany((prev) => ({ ...prev, name: e.target.value }))
+                            }
+                            className="mb-3"
+                            required
+                        />
+                        <CFormInput
+                            type="text"
+                            label="Mã Công ty"
+                            placeholder="Nhập mã công ty"
+                            value={newCompany.code}
+                            onChange={(e) =>
+                                setNewCompany((prev) => ({ ...prev, code: e.target.value }))
+                            }
+                            className="mb-3"
+                            required
+                        />
+                        <CFormInput
+                            type="date"
+                            label="Ngày Thành Lập"
+                            placeholder="Nhập ngày thành lập"
+                            value={newCompany.foundedDate}
+                            onChange={(e) =>
+                                setNewCompany((prev) => ({ ...prev, foundedDate: e.target.value }))
+                            }
+                            className="mb-3"
+                        />
+                        <CFormInput
+                            type="text"
+                            label="Mã Số Thuế"
+                            placeholder="Nhập mã số thuế"
+                            value={newCompany.taxCode}
+                            onChange={(e) =>
+                                setNewCompany((prev) => ({ ...prev, taxCode: e.target.value }))
+                            }
+                            className="mb-3"
+                        />
+                        <CFormInput
+                            type="text"
+                            label="Số Đăng Ký Kinh Doanh"
+                            placeholder="Nhập số đăng ký kinh doanh"
+                            value={newCompany.registrationNumber}
+                            onChange={(e) =>
+                                setNewCompany((prev) => ({
+                                    ...prev,
+                                    registrationNumber: e.target.value,
+                                }))
+                            }
+                            className="mb-3"
+                        />
+                        <CFormInput
+                            type="text"
+                            label="Địa Chỉ"
+                            placeholder="Nhập địa chỉ công ty"
+                            value={newCompany.address}
+                            onChange={(e) =>
+                                setNewCompany((prev) => ({ ...prev, address: e.target.value }))
+                            }
+                            className="mb-3"
+                        />
+                        <CFormInput
+                            type="text"
+                            label="Website"
+                            placeholder="Nhập website công ty"
+                            value={newCompany.website}
+                            onChange={(e) =>
+                                setNewCompany((prev) => ({ ...prev, website: e.target.value }))
+                            }
+                            className="mb-3"
+                        />
+                        <CFormInput
+                            type="textarea"
+                            label="Ghi Chú"
+                            placeholder="Nhập ghi chú"
+                            value={newCompany.notes}
+                            onChange={(e) =>
+                                setNewCompany((prev) => ({ ...prev, notes: e.target.value }))
+                            }
+                            className="mb-3"
+                        />
+                    </CForm>
+                </CModalBody>
+                <CModalFooter>
+                    <CButton color="secondary" onClick={() => setShowAddCompanyModal(false)}>
+                        Đóng
+                    </CButton>
+                    <CButton color="primary" onClick={handleSaveNewCompany}>
+                        Lưu
+                    </CButton>
                 </CModalFooter>
             </CModal>
 
